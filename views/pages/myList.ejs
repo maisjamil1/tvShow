@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%-include('../layout/head.ejs')%>
+</head>
+<body>
+
+    <header>
+        <%-include('../layout/header.ejs')%>
+    </header>
+
+
+
+    <div id="container">
+        <%data.forEach(val=>{%>
+
+
+        <section>
+            <h2><%=val.title%></h2>
+            <img src="<%=val.poster_path%>" alt="">
+
+            <a href="/showDetails/<%=val.id%>"><button>show details</button></a>
+        </section>
+
+
+
+        <%})%>
+    </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <%-include('../layout/head.ejs')%>
+
+</head>
+<body>
+    <header>
+        <%-include('../layout/header.ejs')%>
+    </header>
+
+
+
+
+    <section>
+        <h2>title :<%=val.title%></h2>
+        <img src="<%=val.poster_path%>" alt="">
+<p><span>vote_count: </span> <%=val.vote_count%></p>
+<p><span>overview: </span> <%=val.overview%></p>
+       
+<form action="/update/<%=val.id%>?_method=PUT" method="POST">
+    <input type="text" name="title" value="<%=val.title%>">
+    <input type="text" name="poster_path" value="<%=val.poster_path%>">
+    <input type="text" name="motv_id" value="<%=val.motv_id%>">
+    <input type="text" name="vote_count" value="<%=val.vote_count%>">
+    <input type="text" name="overview" value="<%=val.overview%>">
+
+    <button>update</button>
+</form>
+<form action="/delete/<%=val.id%>?_method=delete" method="POST">
+        <button>delete</button>
+</form>
+    </section>
+
+
+</body>
+</html>

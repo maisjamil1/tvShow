@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%-include('./layout/head.ejs')%>
+</head>
+<body>
+    <header>
+        <%-include('./layout/header.ejs')%>
+    </header>
+
+    <form action="/search" method="POST">
+    <input type="text" name="text" id="" placeholder="write a name" required> 
+    <input type="radio" name="type" value="movie" id="" required><label for="">movie</label>
+    <input type="radio" name="type" value="tv" id="" required><label for="">tv show</label>
+    <button>search</button>
+    
+    </form>
+
+
+
+</body>
+</html>
