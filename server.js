@@ -18,16 +18,16 @@ app.set('view engine', 'ejs')
 
 //___________________________________________________
 
-let handlers=require('./handlers')//ريفاكتورينج للايرور هاندلرز
+let handlers = require('./handlers')//ريفاكتورينج للايرور هاندلرز
 //___________________________________________________
 app.get('/', homeHandler)
 app.post('/search', searchHandler)
 app.get('/showResults', showResultsHandler)
 app.post('/addtolist', addtolistHandler)
-app.get('/myList',showList)
-app.get('/showDetails/:id',showdetails)
-app.put('/update/:id',updateHandler)
-app.delete('/delete/:id',deleteHandler)
+app.get('/myList', showList)
+app.get('/showDetails/:id', showdetails)
+app.put('/update/:id', updateHandler)
+app.delete('/delete/:id', deleteHandler)
 app.use('*', handlers.notFoundHandler)//هون انا استدعيته من ملف الهانلرز
 
 
@@ -35,7 +35,7 @@ app.use('*', handlers.notFoundHandler)//هون انا استدعيته من مل
 
 function homeHandler(req, res) {
     res.render('index.ejs')
-    
+
 }
 //___________________________________________________
 
@@ -51,16 +51,16 @@ function searchHandler(req, res) {
             return new TVmaker(obj)
         })
         res.redirect('/showResults')
-        
+
     })
-     .catch(err=>{
-        handlers.errorHandler(err,req,req)//جاي من ملف الهاندلرز
-    })
+        .catch(err => {
+            handlers.errorHandler(err, req, req)//جاي من ملف الهاندلرز
+        })
 }
 
 function TVmaker(data) {
-    this.motv_id = data.id|| 'not foundddddddd'
-    this.title = data.name ||data.title|| 'not found'
+    this.motv_id = data.id || 'not foundddddddd'
+    this.title = data.name || data.title || 'not found'
     this.poster_path = `https://image.tmdb.org/t/p/w500/${data.poster_path}` || 'not foundddddddd'
     this.vote_count = data.vote_count || 'not foundddddddd'
     this.overview = data.overview || 'not foundddddddd'
@@ -77,67 +77,83 @@ function showResultsHandler(req, res) {
 
 function addtolistHandler(req, res) {
     let { motv_id, title, poster_path, vote_count, overview } = req.body
-    const SQL = 'INSERT INTO mtv(motv_id, title, poster_path, vote_count, overview )VALUES($1,$2,$3,$4,$5);'
-    let VALUES=[motv_id, title, poster_path, vote_count, overview]
-    client.query(SQL,VALUES).then(results=>{
-        res.redirect('/myList')
-    })
-    .catch(err=>{
-        handlers.errorHandler(err,req,req)//جاي من ملف الهاندلرز
-    })
-}
-
-//___________________________________________________
-function showList(req,res){
-    const SQL='SELECT * FROM mtv;'
-    client.query(SQL).then(results=>{
-        res.render('pages/myList.ejs',{data:results.rows})
-    })
-    .catch(err=>{
-        handlers.errorHandler(err,req,req)//جاي من ملف الهاندلرز
-    })
-}
-//___________________________________________________
-
-function showdetails(req,res){
-    let IID=req.params.id
-    let SQL='SELECT * FROM mtv WHERE id=$1;'
-    let VALUES=[IID]
-    client.query(SQL,VALUES).then(results=>{
-        res.render('pages/details.ejs',{val:results.rows[0]})
-    })
-    .catch(err=>{
-        handlers.errorHandler(err,req,req)//جاي من ملف الهاندلرز
-    })
-}
-
-//___________________________________________________
-
-function deleteHandler(req,res){
-    let SQL='DELETE FROM mtv WHERE id=$1;'
-    let VALUES=[req.params.id]
-    client.query(SQL,VALUES).then(results=>{
-        res.redirect('/myList')
-    })
-    .catch(err=>{
-        handlers.errorHandler(err,req,req)//جاي من ملف الهاندلرز
-    })
-}
-
-//___________________________________________________
-
-
-function updateHandler(req,res){
-    let { motv_id, title, poster_path, vote_count, overview } = req.body
     
-    const SQL = 'UPDATE mtv SET motv_id=$1, title=$2, poster_path=$3, vote_count=$4, overview=$5 WHERE id=$6;'
-    let VALUES=[motv_id, title, poster_path, vote_count, overview,req.params.id]
-    client.query(SQL,VALUES).then(results=>{
+//عملت هيك عشان اتاكد انو ما يتكرر عندي اشي بالداتا بيس لما اكبس اضف للقائمة
+    const checkSQL = 'SELECT * FROM mtv WHERE motv_id=$1 AND title=$2 AND poster_path=$3 AND vote_count=$4 AND overview=$5;'
+    let VALUES = [motv_id, title, poster_path, vote_count, overview]
+    client.query(checkSQL, VALUES).then(results => {
+
+        if (results.rows.length === 0) {//اذا الاريه فاضيه معناتو العنصر مش موجود فضيفلي اياه 
+            const SQL = 'INSERT INTO mtv(motv_id, title, poster_path, vote_count, overview )VALUES($1,$2,$3,$4,$5);'
+            client.query(SQL, VALUES).then(results => {
+                res.redirect('/myList')
+            })
+                .catch(err => {
+                    handlers.errorHandler(err, req, req)//جاي من ملف الهاندلرز
+                })
+
+        }else{//اذا العنصر موجود اصلا رجعني لليست
+            res.redirect('/myList')
+        }
+    })
+
+
+
+
+ 
+}
+
+//___________________________________________________
+function showList(req, res) {
+    const SQL = 'SELECT * FROM mtv;'
+    client.query(SQL).then(results => {
+        res.render('pages/myList.ejs', { data: results.rows })
+    })
+        .catch(err => {
+            handlers.errorHandler(err, req, req)//جاي من ملف الهاندلرز
+        })
+}
+//___________________________________________________
+
+function showdetails(req, res) {
+    let IID = req.params.id
+    let SQL = 'SELECT * FROM mtv WHERE id=$1;'
+    let VALUES = [IID]
+    client.query(SQL, VALUES).then(results => {
+        res.render('pages/details.ejs', { val: results.rows[0] })
+    })
+        .catch(err => {
+            handlers.errorHandler(err, req, req)//جاي من ملف الهاندلرز
+        })
+}
+
+//___________________________________________________
+
+function deleteHandler(req, res) {
+    let SQL = 'DELETE FROM mtv WHERE id=$1;'
+    let VALUES = [req.params.id]
+    client.query(SQL, VALUES).then(results => {
         res.redirect('/myList')
     })
-    .catch(err=>{
-        handlers.errorHandler(err,req,req)//جاي من ملف الهاندلرز
+        .catch(err => {
+            handlers.errorHandler(err, req, req)//جاي من ملف الهاندلرز
+        })
+}
+
+//___________________________________________________
+
+
+function updateHandler(req, res) {
+    let { motv_id, title, poster_path, vote_count, overview } = req.body
+
+    const SQL = 'UPDATE mtv SET motv_id=$1, title=$2, poster_path=$3, vote_count=$4, overview=$5 WHERE id=$6;'
+    let VALUES = [motv_id, title, poster_path, vote_count, overview, req.params.id]
+    client.query(SQL, VALUES).then(results => {
+        res.redirect('/myList')
     })
+        .catch(err => {
+            handlers.errorHandler(err, req, req)//جاي من ملف الهاندلرز
+        })
 }
 
 
