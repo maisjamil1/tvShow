@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <%-include('../layout/head.ejs')%>
 </head>
+
 <body>
 
     <header>
@@ -19,12 +21,25 @@
             <h2><%=val.title%></h2>
             <img src="<%=val.poster_path%>" alt="">
 
-            <a href="/showDetails/<%=val.id%>"><button>show details</button></a>
-        </section>
+            <!-- هون عملت شرط عشان ما يطلع ايرور للكومنت -->
+            <%if(!val.comment){%>
+            <p>no comment</p>
+            <%}else{%>
+            <p><span>your comment:</span> <%=val.comment%></p>
+            <%}%>
 
+            <a href="/showDetails/<%=val.id%>"><button>show details</button></a>
+
+
+            <form action="/addComment/<%=val.id%>?_method=PUT" method="POST">
+                <textarea name="comment" id="" cols="20" rows="10"></textarea>
+                <button>add comment</button>
+            </form>
+        </section>
 
 
         <%})%>
     </div>
 </body>
+
 </html>
