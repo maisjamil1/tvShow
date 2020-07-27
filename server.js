@@ -28,18 +28,33 @@ app.get('/myList', showList)
 app.get('/showDetails/:id', showdetails)
 app.put('/update/:id', updateHandler)
 app.delete('/delete/:id', deleteHandler)
+app.put('/addComment/:id', addCommentHandler)
 app.use('*', handlers.notFoundHandler)//هون انا استدعيته من ملف الهانلرز
 
 
+
+
 //___________________________________________________
-
+//تجربة رندر ملف جيسون تعليقات الزوار
 function homeHandler(req, res) {
-    res.render('index.ejs')
+    const dataFronJson=require('./testt.json')
+   let finalJson=dataFronJson.map(val=>{
+       return new JsonCON(val)
+   })
+    res.render('index.ejs',{data:finalJson})
 
+};
+
+function JsonCON(val){
+    this.name=val.name
+    this.date=new Date(val.date).toDateString()//عشان احول الصيغه من 9-5-2020 الى Sat Sep 05 2020
+    this.comment=val.comment
 }
+
 //___________________________________________________
 
 let myTVarr;//طلعتها برا عشان اقدر اوصلها من showResultsHandlerال
+//عشان تبطل لوكال سكوب
 
 function searchHandler(req, res) {
     let Textt = req.body.text
@@ -47,6 +62,7 @@ function searchHandler(req, res) {
     let URL = `https://api.themoviedb.org/3/search/${typee}?api_key=${process.env.MOVIE_API_KEY}&query=${Textt}`
     superagent.get(URL).then(data => {
         let myData = data.body.results
+        // console.log(myData);
         myTVarr = myData.map(obj => {
             return new TVmaker(obj)
         })
@@ -64,6 +80,7 @@ function TVmaker(data) {
     this.poster_path = `https://image.tmdb.org/t/p/w500/${data.poster_path}` || 'not foundddddddd'
     this.vote_count = data.vote_count || 'not foundddddddd'
     this.overview = data.overview || 'not foundddddddd'
+    this.comment = ''//ماحطيت اشي عشان اضيفه بعدين من الفورم 
 }
 
 //___________________________________________________
@@ -77,8 +94,8 @@ function showResultsHandler(req, res) {
 
 function addtolistHandler(req, res) {
     let { motv_id, title, poster_path, vote_count, overview } = req.body
-    
-//عملت هيك عشان اتاكد انو ما يتكرر عندي اشي بالداتا بيس لما اكبس اضف للقائمة
+
+    //عملت هيك عشان اتاكد انو ما يتكرر عندي اشي بالداتا بيس لما اكبس اضف للقائمة
     const checkSQL = 'SELECT * FROM mtv WHERE motv_id=$1 AND title=$2 AND poster_path=$3 AND vote_count=$4 AND overview=$5;'
     let VALUES = [motv_id, title, poster_path, vote_count, overview]
     client.query(checkSQL, VALUES).then(results => {
@@ -92,7 +109,7 @@ function addtolistHandler(req, res) {
                     handlers.errorHandler(err, req, req)//جاي من ملف الهاندلرز
                 })
 
-        }else{//اذا العنصر موجود اصلا رجعني لليست
+        } else {//اذا العنصر موجود اصلا رجعني لليست
             res.redirect('/myList')
         }
     })
@@ -100,7 +117,7 @@ function addtolistHandler(req, res) {
 
 
 
- 
+
 }
 
 //___________________________________________________
@@ -157,6 +174,19 @@ function updateHandler(req, res) {
 }
 
 
+
+//___________________________________________________
+
+function addCommentHandler(req, res) {
+    let SQL = 'UPDATE mtv SET comment=$1 WHERE id=$2;'//هو تلقائيا مافي بالداتا بيس كومنت فانا بضيفه
+    let VALUES = [req.body.comment, req.params.id]
+    client.query(SQL, VALUES).then(results => {
+        res.redirect('/myList')
+    })
+        .catch(err => {
+            handlers.errorHandler(err, req, req)//جاي من ملف الهاندلرز
+        })
+}
 
 //___________________________________________________
 

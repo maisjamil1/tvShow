@@ -16,7 +16,25 @@
     
     </form>
 
+    <div id="container">
+        <%data.forEach(val=>{%>
 
+
+        <section>
+            <span>Visitor comments</span>
+            
+            <h2><%=val.name%></h2>
+            <p><%=val.date%></p>
+            <p><%=val.comment%></p>
+          
+        </section>
+
+
+
+        
+
+        <%})%>
+    </div>
 
 </body>
 </html>
